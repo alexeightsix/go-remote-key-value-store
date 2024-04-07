@@ -15,6 +15,10 @@ func NewConfig(args []string) (config, error) {
 	config := config{}
 	config.pwd = args[0]
 
+	if len(args) < 2 {
+		return config, errors.New("Config Parameters Missing")
+	}
+
 	input := args[1:][0]
 
 	re := regexp.MustCompile(`^--(?P<key>database)=(?P<value>.*)$`)
