@@ -26,23 +26,23 @@ func (s *ArrayStore) has(key string) bool {
 	return has
 }
 
-func (s *ArrayStore) set(key, value string) error {
+func (s *ArrayStore) set(key, value string) {
 	idx, has := s._has(key)
 
-	if has {
-		s.nodes[idx] = node{key, value}
-	} else {
-		s.nodes = append(s.nodes, node{key, value})
-	}
+	node := NewNode(key, value)
 
-	return nil
+	if has {
+		s.nodes[idx] = *node
+	} else {
+		s.nodes = append(s.nodes, *node)
+	}
 }
 
 func (s *ArrayStore) get(key string) (node, error) {
 	idx, has := s._has(key)
 
 	if has == false {
-		return node{}, errors.New("Key not found")
+		return node{}, errors.New(ERROR_KEY_NOT_FOUND)
 	}
 
 	return s.nodes[idx], nil
@@ -52,7 +52,7 @@ func (s *ArrayStore) delete(key string) (bool, error) {
 	idx, has := s._has(key)
 
 	if has == false {
-		return false, errors.New("Key not found")
+		return false, errors.New(ERROR_KEY_NOT_FOUND)
 	}
 
 	tmp := []node{}

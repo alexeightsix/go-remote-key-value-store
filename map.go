@@ -17,9 +17,9 @@ func (s *MapStore) has(key string) bool {
 	return exists
 }
 
-func (s *MapStore) set(key, value string) error {
-	s.nodes[key] = node{key, value}
-	return nil
+func (s *MapStore) set(key, value string) {
+	node := NewNode(key, value)
+	s.nodes[key] = *node
 }
 
 func (s *MapStore) get(key string) (node, error) {
@@ -27,7 +27,7 @@ func (s *MapStore) get(key string) (node, error) {
 		return s.nodes[key], nil
 	}
 
-	return node{}, errors.New("Key does not exists")
+	return node{}, errors.New(ERROR_KEY_NOT_FOUND)
 }
 
 func (s *MapStore) delete(key string) (bool, error) {
@@ -35,5 +35,5 @@ func (s *MapStore) delete(key string) (bool, error) {
 		delete(s.nodes, key)
 		return true, nil
 	}
-	return false, errors.New("Key does not exists")
+	return false, errors.New(ERROR_KEY_NOT_FOUND)
 }

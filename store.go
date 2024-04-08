@@ -15,6 +15,11 @@ const (
 	STORE_TYPE_MAP
 )
 
+const (
+	ERROR_KEY_NOT_FOUND = "ERROR_KEY_NOT_FOUND"
+	ERROR_INVALID_STORE = "ERROR_INVALID_STORE_DRIVER"
+)
+
 type store struct {
 	mu     sync.Mutex
 	driver StoreInterface
@@ -25,7 +30,7 @@ type StoreInterface interface {
 	init()
 	get(key string) (node, error)
 	has(key string) bool
-	set(key, value string) error
+	set(key, value string)
 	delete(key string) (bool, error)
 }
 
@@ -41,7 +46,7 @@ func NewStore(algo int, db *os.File) (*store, error) {
 		store.driver = &MapStore{}
 		store.driver.init()
 	default:
-		return nil, errors.New("INVALID_STORE_TYPE")
+		return nil, errors.New(ERROR_INVALID_STORE)
 	}
 
 	return &store, nil
