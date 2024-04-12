@@ -34,7 +34,7 @@ type StoreInterface interface {
 	delete(key string) (bool, error)
 }
 
-func NewStore(algo int, db *os.File) (*store, error) {
+func NewStore(algo int, db *os.File) (*store, int, error) {
 	store := store{}
 	store.mu = sync.Mutex{}
 	store.db = db
@@ -46,9 +46,12 @@ func NewStore(algo int, db *os.File) (*store, error) {
 		store.driver = &MapStore{}
 		store.driver.init()
 	default:
-		return nil, errors.New(ERROR_INVALID_STORE)
+		return nil, 0, errors.New(ERROR_INVALID_STORE)
 	}
-	return &store, nil
+
+	n := store.hydrate()
+
+	return &store, n, nil
 }
 
 type action struct {

@@ -38,17 +38,23 @@ func (s *server) serve() error {
 	}
 
 	s.ln = listener
-
 	return nil
 }
 
-func NewServer(addr string, port int64, read_timeout time.Duration) *server {
+func NewServer(
+	addr string,
+	port int64,
+	read_timeout time.Duration,
+) (*server, error) {
 	server := &server{}
 	server.addr = addr
 	server.port = port
 	server.read_timeout = read_timeout
 	server.total_connections = 0
-	return server
+
+	err := server.serve()
+
+	return server, err
 }
 
 func (s server) writeResponse(c net.Conn, res response) {
@@ -65,12 +71,12 @@ func (s server) handleConnection(c net.Conn, store *store) error {
 
 	var total []byte
 
-	Log("Processing new connection...")
+	// Log("Processing new connection...")
 
 	errorResponse := response{"SERVER_ERROR", 500}
 
 	for {
-		Log("Reading Request into Buffer")
+		// Log("Reading Request into Buffer")
 		n, err := c.Read(buffer)
 
 		if err != nil || n == 0 {
@@ -85,7 +91,7 @@ func (s server) handleConnection(c net.Conn, store *store) error {
 			continue
 		}
 
-		Log("Parsing Buffer...")
+		// Log("Parsing Buffer...")
 
 		parser := parser{}
 		parser.parse(total).method().subject().value()
