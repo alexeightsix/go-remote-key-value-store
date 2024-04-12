@@ -19,7 +19,7 @@ func main() {
 
 	store, err := NewStore(STORE_TYPE_MAP, config.db)
 
-	n, err := store.hydrate()
+	n := store.hydrate()
 
 	Log(strconv.FormatInt(int64(n), 10) + " record(s) imported")
 
@@ -28,10 +28,11 @@ func main() {
 	}
 
 	var port int64 = 1337
+	var hostname string = "127.0.0.1"
 
 	read_timeout := time.Second * 5000
 
-	server := NewServer("127.0.0.1", port, read_timeout)
+	server := NewServer(hostname, port, read_timeout)
 
 	err = server.serve()
 
@@ -41,15 +42,18 @@ func main() {
 
 	defer server.ln.Close()
 
-	Log("Listening for new connections on 127.0.0.1:" + strconv.FormatInt(int64(port), 10))
+	Log("Listening for new connections on " + server.addr + ":" + strconv.FormatInt(int64(port), 10))
 
 	for {
 		c, err := server.ln.Accept()
 
 		server.total_connections++
 
-		if err == nil {
-			go server.handleConnection(c, store)
+		if err != nil {
+			Log(err.Error())
+			continue
 		}
+
+		go server.handleConnection(c, store)
 	}
 }

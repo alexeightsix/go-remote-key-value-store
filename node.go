@@ -1,6 +1,8 @@
 package main
 
-import "time"
+import (
+	"time"
+)
 
 type node struct {
 	key        string
@@ -12,8 +14,7 @@ func (n node) isExpired() bool {
 	if n.expires_at.IsZero() {
 		return false
 	}
-
-	return time.Now().UnixMicro() < n.expires_at.UnixMicro()
+	return time.Now().UnixMicro() > n.expires_at.UnixMicro()
 }
 
 func (n *node) setExpiresAt(time time.Time) *node {
@@ -25,6 +26,5 @@ func NewNode(key string, value string) *node {
 	n := node{}
 	n.key = key
 	n.value = value
-
 	return &n
 }

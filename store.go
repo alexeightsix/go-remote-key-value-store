@@ -48,42 +48,64 @@ func NewStore(algo int, db *os.File) (*store, error) {
 	default:
 		return nil, errors.New(ERROR_INVALID_STORE)
 	}
-
 	return &store, nil
 }
 
-type Action struct {
-	pos    time.Duration
+type action struct {
+	time   time.Time
 	method method
 	node   node
 }
 
-func (s *store) hydrate() (int, error) {
+func (s *store) readActions(cb func(action action)) {
 	scanner := bufio.NewScanner(s.db)
 
-	lp := 0
+	const (
+		COL_TIME       = 0
+		COL_ACTION     = 1
+		COL_KEY        = 2
+		COL_VALUE      = 3
+		COL_EXPIRES_AT = 4
+	)
 
 	for scanner.Scan() {
-		z := strings.Split(scanner.Text(), "\t")
+		line := strings.Split(scanner.Text(), "\t")
 
-		if z[1] != string(SERVER_METHOD_SET) {
-			continue
+		t, err := strconv.Atoi(line[COL_TIME])
+		timestamp := time.UnixMicro(int64(t))
+
+		if err != nil {
+			panic(err)
 		}
 
-		node := node{}
-		node.key = z[2]
-		node.value = z[3]
+		action := action{}
+		action.time = timestamp
 
-		if s.driver.has(node.key) {
-			continue
+		switch line[COL_ACTION] {
+		case "SET":
+			action.method = SERVER_METHOD_GET
+			action.node = *NewNode(line[COL_KEY], line[COL_VALUE])
+			break
+		case "DEL":
+			action.method = SERVER_METHOD_DEL
+			action.node = *NewNode(line[COL_KEY], "")
+			break
+		default:
+			panic("Unable to parse Action")
 		}
 
-		s.driver.set(node.key, node.value)
-
-		lp++
+		cb(action)
 	}
+}
 
-	return lp, nil
+func (s *store) hydrate() (x int) {
+	s.readActions(func(action action) {
+		if action.method != SERVER_METHOD_SET && !s.has(action.node.key) {
+			s.set(action.node.key, action.node.value)
+			x++
+		}
+	})
+	return x
 }
 
 func (s *store) commitSet(key string, value string) (int, error) {
