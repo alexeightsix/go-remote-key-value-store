@@ -1,24 +1,26 @@
 package main
 
 import (
-	"os"
 	"strconv"
 	"time"
 )
 
 type app struct {
-	store StoreInterface
-	log   Log
+	store  StoreInterface
+	log    Log
+	config config
+}
+
+func NewApp(config config) app {
+	app := app{}
+	app.config = config
+	return app
 }
 
 func (app app) run() {
 	app.log.Notice("Starting Application...")
 
-	config, err := NewConfig(os.Args)
-
-	if err != nil {
-		panic(err)
-	}
+	config := app.config
 
 	app.log.Notice("Found " + config.db.Name())
 
