@@ -4,6 +4,12 @@ import (
 	"errors"
 )
 
+type payload struct {
+	method  method
+	subject string
+	value   string
+}
+
 type parser struct {
 	error   error
 	payload payload
@@ -91,7 +97,7 @@ func (p *parser) value() *parser {
 	}
 
 	if p.buf[len(p.buf)-1] != NEW_LINE {
-		p.error = errors.New("invalid value, value must end with")
+		p.error = errors.New("INVALID_VALUE")
 		return p
 	}
 
