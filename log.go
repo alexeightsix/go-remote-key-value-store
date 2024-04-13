@@ -1,15 +1,15 @@
 package main
 
 import (
-	"fmt"
-	"time"
+	// "fmt"
+	// "time"
 )
 
 type Log struct {
 }
 
 func (l Log) Log(str string) {
-	fmt.Println(time.Now().String() + "\t" + str)
+	// fmt.Println(time.Now().String() + "\t" + str)
 }
 
 func (l Log) Notice(str string) {

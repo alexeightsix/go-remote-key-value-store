@@ -38,6 +38,8 @@ func (s *server) serve() error {
 	}
 
 	s.ln = listener
+
+
 	return nil
 }
 

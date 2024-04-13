@@ -9,7 +9,7 @@ import (
 func StoreFactory(driver int) (*store, error) {
 	tmp := os.TempDir()
 	file, _ := os.CreateTemp(tmp, "test.db")
-	store, err := NewStore(driver, file)
+	store, _, err := NewStore(driver, file)
 	return store, err
 }
 

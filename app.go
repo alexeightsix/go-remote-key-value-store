@@ -6,9 +6,10 @@ import (
 )
 
 type app struct {
-	store  StoreInterface
+	store  *store
 	log    Log
 	config config
+	server *server
 }
 
 func NewApp(config config) app {
@@ -17,7 +18,11 @@ func NewApp(config config) app {
 	return app
 }
 
-func (app app) run() {
+func (app *app) shutdown() {
+	app.server.ln.Close()
+}
+
+func (app *app) run() {
 	app.log.Notice("Starting Application...")
 
 	config := app.config
@@ -25,6 +30,8 @@ func (app app) run() {
 	app.log.Notice("Found " + config.db.Name())
 
 	store, n, err := NewStore(STORE_TYPE_MAP, config.db)
+
+	app.store = store
 
 	if err != nil {
 		panic(err)
@@ -37,6 +44,9 @@ func (app app) run() {
 	read_timeout := time.Second * 5000
 
 	server, err := NewServer(hostname, port, read_timeout)
+
+	app.server = server
+
 	defer server.ln.Close()
 
 	if err != nil {
